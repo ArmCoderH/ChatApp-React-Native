@@ -1,5 +1,5 @@
 import {StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import React, { useContext } from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 // import MaterialIcons from '@react-native-vector-icons/material-icons';
@@ -10,10 +10,16 @@ import RegisterScreen from '../screens/RegisterScreen';
 import PeopleScreen from '../screens/PeopleScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import ChatsScreen from '../screens/ChatsScreen';
+import { AuthContext } from '../AuthContext';
+import { Camera , User, MessageCircle} from 'lucide-react-native';
+import RequestChatRoom from '../screens/RequestChatRoom';
+
+
 
 const StackNavigator = () => {
   const Stack = createNativeStackNavigator();
   const Tab = createBottomTabNavigator();
+  const {token,setToken} = useContext(AuthContext);
 
   function BottomTabs() {
     return (
@@ -24,12 +30,14 @@ const StackNavigator = () => {
           options={{
             tabBarStyle: {backgroundColor: '#101010'},
             headerShown: false,
-            // tabBarIcon: ({focused}) =>
-            //   focused ? (
-            //     <Ionicons name="house" color="#ff0000" size={20} />
-            //   ) : (
-            //     <Ionicons name="house" color="#ff0000" size={20} />
-            //   ),
+            tabBarIcon: ({focused}) =>
+              focused ? (
+                <MessageCircle color="white" size={30} />
+                
+              ) : (
+                <MessageCircle color="white" size={30} />
+                
+              ),
           }}>
 
           </Tab.Screen>
@@ -39,12 +47,13 @@ const StackNavigator = () => {
           options={{
             tabBarStyle: {backgroundColor: '#101010'},
             headerShown: false,
-            // tabBarIcon: ({focused}) =>
-            //   focused ? (
-            //   <Ionicons name="house" color="#ff0000" size={20} />
-            //   ) : (
-            //   <Ionicons name="house" color="#ff0000" size={20} />
-            //   ),
+            tabBarIcon: ({focused}) =>
+              focused ? (
+              <User color="white" size={30} />
+                
+              ) : (
+              <User color="white" size={30} />
+              ),
           }}></Tab.Screen>
       </Tab.Navigator>
     );
@@ -64,12 +73,13 @@ const StackNavigator = () => {
         <Stack.Navigator>
             <Stack.Screen name="BottomTabs" component={BottomTabs} options={{headerShown : false}}/>
             <Stack.Screen name="People" component={PeopleScreen} options={{headerShown : false}}/>
+            <Stack.Screen name="Request" component={RequestChatRoom}/>
         </Stack.Navigator>
     )
   }
   return (
     <NavigationContainer>
-        <AuthStack/>
+        {token === null || token === '' ? <AuthStack /> : <MainStack />}
     </NavigationContainer>
   );
 };

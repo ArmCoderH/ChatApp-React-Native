@@ -7,18 +7,63 @@ import {
   Pressable,
   Image,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
-import React, {useState} from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import React, { useState, useEffect, useContext } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { AuthContext } from '../AuthContext';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigation = useNavigation();
+  const { token, setToken } = useContext(AuthContext);
+
+  useEffect(() => {
+    if (token) {
+      navigation.replace('MainStack', { screen: 'Main' });
+    }
+  }, [token, navigation]);
+
+  const handleLogin = () => {
+    const user = {
+      email: email,
+      password: password,
+    };
+  
+    axios
+      .post('http://192.168.0.52:4000/login', user)
+      .then(response => {
+        const token = response.data.token;
+        AsyncStorage.setItem('authToken', token);
+        setToken(token);
+        Alert.alert('Login Successful', 'You have successfully logged in.');
+      })
+      .catch(error => {
+        if (error.response) {
+          // The request was made, but the server responded with an error
+          console.error('Response error:', error.response);
+          Alert.alert('Login Failed', 'Invalid email or password.');
+        } else if (error.request) {
+          // The request was made but no response was received
+          console.error('Request error:', error.request);
+          Alert.alert('Network Error', 'Please check your network connection.');
+        } else {
+          // Something happened while setting up the request
+          console.error('Error:', error.message);
+          Alert.alert('Error', 'Something went wrong.');
+        }
+      });
+  };
+  
+  
+
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
-      <View style={{padding: 20, alignItems: 'center'}}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+      <View style={{ padding: 20, alignItems: 'center' }}>
         <KeyboardAvoidingView>
           <View
             style={{
@@ -26,17 +71,16 @@ const LoginScreen = () => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <Text style={{fontSize: 20, fontWeight: '500'}}>
+            <Text style={{ fontSize: 20, fontWeight: '500' }}>
               Login to your account
             </Text>
           </View>
-          <View style={{marginTop: 50}}>
+          <View style={{ marginTop: 50 }}>
             <View>
-              <Text style={{fontSize: 18, fontWeight: '600', color: 'gray'}}>
+              <Text style={{ fontSize: 18, fontWeight: '600', color: 'gray' }}>
                 Email
               </Text>
               <View>
-                placeholder:"Enter your email"
                 <TextInput
                   value={email}
                   onChangeText={setEmail}
@@ -74,6 +118,7 @@ const LoginScreen = () => {
               />
             </View>
             <TouchableOpacity
+              onPress={handleLogin}
               style={{
                 width: 200,
                 backgroundColor: '#4A55A2',
@@ -102,7 +147,12 @@ const LoginScreen = () => {
                   fontSize: 16,
                   margin: 20,
                 }}>
-                Don't have an account? <Text style={{color : 'red'}} onPress={() => navigation.navigate('Register')}>Sign Up</Text>
+                Don't have an account?{' '}
+                <Text
+                  style={{ color: 'red' }}
+                  onPress={() => navigation.navigate('Register')}>
+                  Sign Up
+                </Text>
               </Text>
             </Pressable>
           </View>
@@ -113,7 +163,7 @@ const LoginScreen = () => {
               alignItems: 'center',
             }}>
             <Image
-              style={{width: 140, height: 170}}
+              style={{ width: 140, height: 170 }}
               source={{
                 uri: 'https://signal.org/assets/images/features/Media.png',
               }}

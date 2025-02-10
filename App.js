@@ -24,9 +24,9 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 import StackNavigator from './navigation/StackNavigator';
+import {AuthProvider} from './AuthContext';
 
-
-function Section({children, title}){
+function Section({children, title}) {
   const isDarkMode = useColorScheme() === 'dark';
   return (
     <View style={styles.sectionContainer}>
@@ -52,7 +52,7 @@ function Section({children, title}){
   );
 }
 
-function App(){
+function App() {
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
@@ -60,7 +60,9 @@ function App(){
   };
 
   return (
-    <StackNavigator/>
+    <AuthProvider>
+      <StackNavigator />
+    </AuthProvider>
   );
 }
 

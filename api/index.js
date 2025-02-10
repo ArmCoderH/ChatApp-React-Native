@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
@@ -14,10 +14,11 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => console.log('Connected to MongoDB'))
   .catch(error => console.log('Error connecting to MongoDB:', error));
 
@@ -50,6 +51,7 @@ app.post('/register', async (req, res) => {
 });
 
 // Login API
+// Login API
 app.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -67,14 +69,52 @@ app.post('/login', async (req, res) => {
     }
 
     // Generate JWT token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(
+      { userId: user._id.toString() }, // 🔹 Convert ObjectId to string
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
 
-    res.status(200).json({ token, user });
+    console.log('✅ Login Successful, Token Generated:', token);
+
+    res.status(200).json({ token, userId: user._id.toString(), user });
   } catch (error) {
-    console.error('Error logging in:', error);
+    console.error('❌ Error logging in:', error);
     res.status(500).json({ message: 'Error logging in' });
   }
 });
+
+
+// Get Users API (Excluding Current User)
+// const mongoose = require('mongoose');
+
+// Get Users API (Including Current User)
+app.get('/users/:userId', async (req, res) => {
+  try {
+    const users = await User.find(); // ✅ अब यह सभी users को return करेगा
+    res.json(users);
+  } catch (error) {
+    console.log('Error fetching users:', error);
+    res.status(500).json({ message: 'Error fetching users' });
+  }
+});
+
+
+// Send Friend Request API
+app.post('/sendrequest', async (req, res) => {
+    const { senderId, receiverId, message } = req.body;
+
+    const receiver = await User.findById(receiverId);
+    if (!receiver) {
+      return res.status(400).json({ message: 'Receiver not found' });
+    }
+
+    receiver.requests.push({ from: senderId, message });
+    await receiver.save();
+
+    res.status(200).json({ message: 'Request sent successfully!' });
+  } 
+);
 
 // Start Server
 app.listen(port, () => {
