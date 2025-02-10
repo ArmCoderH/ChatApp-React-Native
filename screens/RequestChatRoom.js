@@ -18,6 +18,7 @@ import axios from 'axios';
 const RequestChatRoom = () => {
   const navigation = useNavigation();
   const [message, setMessage] = useState('');
+  const {token,userId,setToken,setUserId} = useContext(AuthContext)
   const route = useRoute();
 
   useLayoutEffect(() => {
@@ -33,6 +34,9 @@ const RequestChatRoom = () => {
       ),
     });
   }, [navigation, route]);
+
+  
+  
 
   const sendMessage = async() => {
     try {
@@ -51,6 +55,9 @@ const RequestChatRoom = () => {
       console.log("Erro is",error)
     }
   };
+  console.log("userid",userId);
+  console.log('rec',route?.params?.receiverId);
+  
 
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: 'white', marginBottom:10 }} behavior="padding">
