@@ -4,25 +4,28 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
-  ScrollView,
 } from 'react-native';
-import React, {useContext, useEffect, useState} from 'react';
-import {Camera, User, ChevronDown, Trash} from 'lucide-react-native';
+import React, {useContext, useState, useEffect} from 'react';
+import {AuthContext} from '../AuthContext';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import Entypo from 'react-native-vector-icons/Entypo';
+// import 'core-js/stable/atob';
+
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {AuthContext} from '../AuthContext';
-import jwtDecode from 'jwt-decode'; // Corrected import
+import {jwtDecode} from 'jwt-decode';
 import axios from 'axios';
 import Chat from '../components/Chat';
+import { Camera, User, ChevronDown, Trash } from 'lucide-react-native';
+
 
 const ChatsScreen = () => {
   const [options, setOptions] = useState(['Chats']);
   const [chats, setChats] = useState([]);
   const [requests, setRequests] = useState([]);
   const {token, setToken, setUserId, userId} = useContext(AuthContext);
-
   const chooseOption = option => {
     if (options.includes(option)) {
       setOptions(options.filter(c => c !== option));
@@ -30,13 +33,10 @@ const ChatsScreen = () => {
       setOptions([...options, option]);
     }
   };
-
   const navigation = useNavigation();
-
   const logout = () => {
     clearAuthToken();
   };
-
   const clearAuthToken = async () => {
     try {
       await AsyncStorage.removeItem('authToken');
@@ -58,10 +58,9 @@ const ChatsScreen = () => {
 
     fetchUser();
   }, []);
-
   useEffect(() => {
     if (userId) {
-      getRequests();
+      getrequests();
     }
   }, [userId]);
   useEffect(() => {
@@ -69,19 +68,18 @@ const ChatsScreen = () => {
       getUser();
     }
   }, [userId]);
-
-  const getRequests = async () => {
+  const getrequests = async () => {
     try {
       const response = await axios.get(
         `http://192.168.0.52:4000/getrequests/${userId}`,
       );
-      console.log('Fetched requests:', response.data); // Add logging here
+
       setRequests(response.data);
     } catch (error) {
-      console.log('Error fetching requests:', error);
+      console.log('error', error);
     }
   };
-
+  console.log(requests);
   const acceptRequest = async requestId => {
     try {
       const response = await axios.post('http://192.168.0.52:4000/acceptrequest', {
@@ -90,60 +88,67 @@ const ChatsScreen = () => {
       });
 
       if (response.status == 200) {
-        await getRequests();
+        await getrequests();
       }
     } catch (error) {
       console.log('error', error);
     }
   };
+  const getUser = async () => {
+    try {
+      const response = await axios.get(`http://192.168.0.52:4000/user/${userId}`);
+      setChats(response.data);
+    } catch (error) {
+      console.log('Error fetching user', error);
+      throw error;
+    }
+  };
 
-const getUser = async () => {
-  try {
-    const response = await axios.get(`http://192.168.0.52:4000/users/${userId}`)
-    setChats(response.data)
-    
-  } catch (error) {
-    console.log("Error is=",error)
-    throw error;
-  }
-}
-
+  console.log('users', chats);
   return (
-    <ScrollView>
-      <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
-        {/* Header Section */}
-        <View style={styles.header}>
-          <Pressable onPress={logout}>
-            <Image
-              style={styles.profileImage}
-              source={{
-                uri: 'https://lh3.googleusercontent.com/ogw/AF2bZyi09EC0vkA0pKVqrtBq0Y-SLxZc0ynGmNrVKjvV66i3Yg=s64-c-mo',
-              }}
-            />
-          </Pressable>
+    <SafeAreaView style={{flex:1,backgroundColor:"white"}}>
+      <View
+        style={{
+          padding: 10,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 10,
+          justifyContent: 'space-between',
+        }}>
+        <Pressable onPress={logout}>
+          <Image
+            style={{width: 30, height: 30, borderRadius: 15}}
+            source={{
+              uri: 'https://lh3.googleusercontent.com/ogw/AF2bZyi09EC0vkA0pKVqrtBq0Y-SLxZc0ynGmNrVKjvV66i3Yg=s64-c-mo',
+            }}
+          />
+        </Pressable>
 
-          <Text style={styles.headerText}>Chats</Text>
+        <Text style={{fontSize: 15, fontWeight: '500'}}>Chats</Text>
 
-          <View style={styles.iconContainer}>
-            <TouchableOpacity>
-              <Camera color="black" size={30} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('People')}>
-              <User color="black" size={30} />
-            </TouchableOpacity>
+        <View>
+          <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
+          <Camera color="black" size={30} />
+            <User  onPress={() => navigation.navigate('People')} color="black" size={30} />
           </View>
         </View>
+      </View>
 
-        {/* Chats Section */}
-        <View style={styles.optionContainer}>
-          <Pressable
-            onPress={() => chooseOption('Chats')}
-            style={styles.option}>
-            <Text style={styles.optionText}>Chats</Text>
-            <ChevronDown color="black" size={20} />
-          </Pressable>
-
+      <View style={{padding: 10}}>
+        <Pressable
+          onPress={() => chooseOption('Chats')}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}>
           <View>
+            <Text>Chats</Text>
+          </View>
+          <ChevronDown color="black" size={25} />
+        </Pressable>
+
+        <View>
           {options?.includes('Chats') &&
             (chats?.length > 0 ? (
               <View>
@@ -169,125 +174,83 @@ const getUser = async () => {
               </View>
             ))}
         </View>
-          <Pressable
-            onPress={() => chooseOption('Requests')}
-            style={styles.option}>
-            <Text style={styles.optionText}>Requests</Text>
-            <ChevronDown color="black" size={20} />
-          </Pressable>
 
+        <Pressable
+          onPress={() => chooseOption('Requests')}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}>
           <View>
-            {options.includes('Requests') && (
-              <View>
-                <Text>Checkout all the requests</Text>
-                {requests.length > 0 ? (
-                  requests.map((item, index) => (
-                    <View key={index} style={styles.requestItem}>
-                      <Pressable>
-                        <Image
-                          source={{uri: item?.from?.image}}
-                          style={styles.requestImage}
-                        />
-                      </Pressable>
-                      <View style={styles.requestInfo}>
-                        <Text>{item?.from?.name}</Text>
-                        <Text>{item?.message}</Text>
-                      </View>
-
-                      <TouchableOpacity
-                      onPress={() => acceptRequest(item?.from?._id)}
-                        style={{ 
-                          padding: 8,
-                          marginRight: 10,
-                          backgroundColor: '#005187',
-                          width: 75,
-                          borderRadius: 10,
-                        }}>
-                        <Text
-                          style={{
-                            frontSize: 13,
-                            textAlign: 'center',
-                            color: 'white',
-                          }}>
-                          Accept
-                        </Text>
-                      </TouchableOpacity>
-
-                      <View>
-                        <Trash color="red" size={30} />
-                      </View>
-                    </View>
-                  ))
-                ) : (
-                  <Text>No requests found</Text>
-                )}
-              </View>
-            )}
+            <Text>Requests</Text>
           </View>
+          <ChevronDown color="black" size={25} />
+
+        </Pressable>
+
+        <View style={{marginVertical: 12}}>
+          {options?.includes('Requests') && (
+            <View>
+              <Text style={{fontSize: 15, fontWeight: '500'}}>
+                Checkout all the requests
+              </Text>
+
+              {requests?.map((item, index) => (
+                <Pressable style={{marginVertical: 12}}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 10,
+                    }}>
+                    <Pressable>
+                      <Image
+                        source={{uri: item?.from?.image}}
+                        style={{width: 40, height: 40, borderRadius: 20}}
+                      />
+                    </Pressable>
+
+                    <View style={{flex: 1}}>
+                      <Text style={{fontSize: 15, fontWeight: '500'}}>
+                        {item?.from?.name}
+                      </Text>
+
+                      <Text style={{marginTop: 4, color: 'gray'}}>
+                        {item?.message}
+                      </Text>
+                    </View>
+
+                    <Pressable
+                      onPress={() => acceptRequest(item?.from?._id)}
+                      style={{
+                        padding: 8,
+                        backgroundColor: '#005187',
+                        width: 75,
+                        borderRadius: 5,
+                      }}>
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          textAlign: 'center',
+                          color: 'white',
+                        }}>
+                        Accept
+                      </Text>
+                    </Pressable>
+
+                    <AntDesign name="delete" size={26} color="red" />
+                  </View>
+                </Pressable>
+              ))}
+            </View>
+          )}
         </View>
-      </SafeAreaView>
-    </ScrollView>
+      </View>
+    </SafeAreaView>
   );
 };
 
 export default ChatsScreen;
 
-const styles = StyleSheet.create({
-  header: {
-    padding: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  headerText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-  },
-  iconContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 15,
-  },
-  optionContainer: {
-    padding: 10,
-  },
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 15,
-  },
-  optionText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-  },
-  requestItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
-  },
-  requestImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  requestInfo: {
-    marginLeft: 10,
-    flex: 1,
-  },
-  requestName: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  requestEmail: {
-    fontSize: 14,
-    color: 'gray',
-  },
-});
+const styles = StyleSheet.create({});

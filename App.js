@@ -25,6 +25,7 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 import StackNavigator from './navigation/StackNavigator';
 import {AuthProvider} from './AuthContext';
+import { SocketContextProvider } from './SocketContext';
 
 function Section({children, title}) {
   const isDarkMode = useColorScheme() === 'dark';
@@ -61,7 +62,9 @@ function App() {
 
   return (
     <AuthProvider>
+      <SocketContextProvider>
       <StackNavigator />
+      </SocketContextProvider>
     </AuthProvider>
   );
 }

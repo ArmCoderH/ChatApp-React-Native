@@ -13,6 +13,7 @@ import ChatsScreen from '../screens/ChatsScreen';
 import { AuthContext } from '../AuthContext';
 import { Camera , User, MessageCircle} from 'lucide-react-native';
 import RequestChatRoom from '../screens/RequestChatRoom';
+import ChatRoom from '../screens/ChatRoom';
 
 
 
@@ -74,6 +75,7 @@ const StackNavigator = () => {
             <Stack.Screen name="BottomTabs" component={BottomTabs} options={{headerShown : false}}/>
             <Stack.Screen name="People" component={PeopleScreen} options={{headerShown : false}}/>
             <Stack.Screen name="Request" component={RequestChatRoom}/>
+            <Stack.Screen name="ChatRoom" component={ChatRoom}/>
         </Stack.Navigator>
     )
   }
