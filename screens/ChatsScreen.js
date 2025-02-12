@@ -239,7 +239,7 @@ const ChatsScreen = () => {
                       </Text>
                     </Pressable>
 
-                    <AntDesign name="delete" size={26} color="red" />
+                    <Trash name="delete" size={26} color="red" />
                   </View>
                 </Pressable>
               ))}
