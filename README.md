@@ -1,4 +1,4 @@
-![Image](https://github.com/user-attachments/assets/ce4c00db-301f-41b5-aa63-18181fc3ac56)
+![Image](https://github.com/user-attachments/assets/f82c8a1f-f2f5-432e-b7ae-05ac25724088)
 
 
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
